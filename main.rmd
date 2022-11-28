@@ -1,0 +1,6 @@
+---
+title: Dimension Reduction in MNIST
+author: Zhenhua Wang & Zewei Kong
+output: pdf_document
+---
+
