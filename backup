@@ -68,7 +68,6 @@ yhat.lasso <- predict(lasso.mod, s = bestlam.lasso, newx = test.df)
 
 accuracy(yhat.lasso == test.y)
 
-
 train_x <- as.matrix(compx)
 train_y <- y_train
 k <- 5
@@ -92,3 +91,11 @@ for (i in 1:k) {
 }
 cv_accuracy_mean <- mean(cv_accuracy)
 cv_accuracy_mean
+
+
+embeding <- embed(X, dimension = 2)
+llebed <- lle(X, 2)
+
+
+plot(embeding@data@data, col = y_train)
+plot(X %*% comps[,1:2], col = y_train)
