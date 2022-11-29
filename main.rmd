@@ -5,13 +5,45 @@ output: pdf_document
 ---
 
 ```{r}
-library(keras)
+library(tidyverse)
+library(RDRToolbox)
+library(Matrix)
+library(xgboost)
 ```
 
 ```{r}
-mnist <- dataset_mnist()
-X_train <- mnist$train$x
-X_test <- mnist$test$x
-y_train <- mnist$train$y
-y_test <- mnist$test$y
+train_data <- read.csv("./mnist/train.csv")
+test_data <- read.csv("./mnist/test.csv")
+
+x_train <- as.matrix(train_data %>% select(-label))
+x_test <- as.matrix(test_data)
+y_train <- train_data$label
+```
+
+# Predict with xgboost
+```{r}
+mnist_autoencoder <- read.csv("./output/mnist_autoencoder.csv")
+train_x <- as.matrix(mnist_autoencoder)
+train_y <- y_train
+
+k <- 5
+n <- nrow(train_x)
+cv_accuracy <- c()
+folds <- sample(rep(1:k, length = n))
+for (i in 1:k) {
+  mnist_model <-
+    xgboost(
+      data = train_x[folds != i, ],
+      label = train_y[folds != i],
+      nrounds = 1000,
+      objective = "multi:softmax",
+      num_class = 10,
+      early_stopping_rounds = 5,
+      max_depth = 2,
+      eta = .8)
+  y_hat <- predict(mnist_model, train_x[folds == i, ])
+  cv_errors[i] <- mean(train_y[folds == i] == y_hat)
+  cat(i, "\r")
+}
+cv_accuracy_mean <- mean(cv_accuracy)
 ```
