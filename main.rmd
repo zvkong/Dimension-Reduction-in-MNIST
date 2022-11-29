@@ -42,8 +42,9 @@ for (i in 1:k) {
       max_depth = 2,
       eta = .8)
   y_hat <- predict(mnist_model, train_x[folds == i, ])
-  cv_errors[i] <- mean(train_y[folds == i] == y_hat)
+  cv_accuracy[i] <- mean(train_y[folds == i] == y_hat)
   cat(i, "\r")
 }
 cv_accuracy_mean <- mean(cv_accuracy)
 ```
+>
