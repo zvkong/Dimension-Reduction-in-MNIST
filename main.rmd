@@ -14,17 +14,14 @@ library(xgboost)
 ```{r}
 train_data <- read.csv("./mnist/train.csv")
 test_data <- read.csv("./mnist/test.csv")
-
-x_train <- as.matrix(train_data %>% select(-label))
-x_test <- as.matrix(test_data)
-y_train <- train_data$label
 ```
 
 # Predict with xgboost
 ```{r}
+## load lower dimension representation
 mnist_autoencoder <- read.csv("./output/mnist_autoencoder.csv")
 train_x <- as.matrix(mnist_autoencoder)
-train_y <- y_train
+train_y <- train_data$label
 
 k <- 5
 n <- nrow(train_x)
@@ -47,4 +44,3 @@ for (i in 1:k) {
 }
 cv_accuracy_mean <- mean(cv_accuracy)
 ```
->
