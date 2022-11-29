@@ -1,0 +1,94 @@
+library(readr)
+library(mice);library(tidyverse);library(caret);library(glmnet);library(gbm)
+library(xgboost);library(Metrics);library(pls)
+
+
+train <- read.csv('c:/Project 2 8330/train.csv', header = TRUE)
+test <- read.csv('c:/Project 2 8330/test.csv', header = TRUE)
+train <- as.matrix(train)
+# define x 
+X_train <- as.matrix(train[,-1])
+X_test <- test
+y_train <- train$label
+
+X <- X_train
+
+image(matrix(X[15,], nrow = sqrt(ncol(X))))
+
+set.seed(1)
+subsamp <- X[c(sample(1:14000, 700),
+               sample(14001: 28000, 700),
+               sample(28001: 42000, 700)), ]
+
+Xcentered <- scale(subsamp, center = T, scale = F)
+svd <- svd(Xcentered)
+scores <- Xcentered %*% svd$v[,1:2]
+trueD <- svd$d
+
+#M <- 40
+#comp <- svd$u[, 1: M, drop = FALSE] %*%
+#  (svd$d[1: M]*t(svd$v[, 1: M, drop = FALSE]))
+#dim(comp)
+
+set.seed(1)
+scramble <- function(x) x[sample(length(x), length(x))]
+xscramble <- apply(Xcentered, 2, scramble)
+svdscramble <- svd(xscramble)
+scrambleD <- svdscramble$d
+plot(log(trueD[1:100]))
+points(log(scrambleD[1:100]))
+
+# Do the pca
+pcomp <- prcomp(Xcentered)
+comps <- pcomp$rotation[,1:38]
+dim(X)
+dim(comps)
+dim(compx <- X%*%comps)
+compx
+
+set.seed(4)
+# Using lasso regression to fit the data
+
+set.seed(8330)
+
+training <- sample(1:nrow(compx), nrow(compx)*0.7)
+train.df <- compx[training,]
+test.df <- compx[-training,]
+output.y <- y_train[training]
+test.y <- y_train[-training]
+
+grid <- seq(1, 0, -0.001)
+
+cv.lasso <- cv.glmnet(train.df, output.y, alpha = 1)
+plot(cv.lasso)
+bestlam.lasso <- cv.lasso$lambda.min
+
+lasso.mod <- glmnet(train.df, output.y, alpha = 1, lambda = grid, thresh = 1e-12)
+yhat.lasso <- predict(lasso.mod, s = bestlam.lasso, newx = test.df)
+
+accuracy(yhat.lasso == test.y)
+
+
+train_x <- as.matrix(compx)
+train_y <- y_train
+k <- 5
+n <- nrow(train_x)
+cv_accuracy <- c()
+folds <- sample(rep(1:k, length = n))
+for (i in 1:k) {
+  mnist_model <-
+    xgboost(
+      data = train_x[folds != i, ],
+      label = train_y[folds != i],
+      nrounds = 2000,
+      objective = "multi:softmax",
+      num_class = 10,
+      early_stopping_rounds = 5,
+      max_depth = 2,
+      eta = 1)
+  y_hat <- predict(mnist_model, train_x[folds == i, ])
+  cv_accuracy[i] <- mean(train_y[folds == i] == y_hat)
+  cat(i, "\r")
+}
+cv_accuracy_mean <- mean(cv_accuracy)
+cv_accuracy_mean
