@@ -51,6 +51,7 @@ train_x <- as.matrix(train_x_low_data)
 train_y <- train_data$label
 test_x <- as.matrix(test_x_low_data)
 
+start_time <- Sys.time()
 mnist_model <-
   xgboost(
     data = train_x,
@@ -61,7 +62,9 @@ mnist_model <-
     early_stopping_rounds = 5,
     max_depth = 2,
     eta = .8)
+end_time <- Sys.time()
+time_diff <- end_time - start_time
 y_hat <- predict(mnist_model, test_x)
 submission <- data.frame(ImageId = seq_len(nrow(test_x)), Label = y_hat)
-write.csv(submission, "./submission.csv")
+write.csv(submission, "./submission.csv", row.names = FALSE)
 ```
