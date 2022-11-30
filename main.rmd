@@ -14,35 +14,54 @@ library(xgboost)
 ```
 
 ```{r}
-train_data <- read.csv("./mnist/train.csv")
-test_data <- read.csv("./mnist/test.csv")
+mnist_data <- read.csv("./mnist/train.csv")
+## load lower dimension representation
+low_dim_rep <- read.csv("./output/mnist_autoencoder.csv")
+x <- data %>% select(-label)
+y <- data$label
+
+train_idx <- sample(seq_len(nrow(x)), round(nrow(x) * 0.85))
+val_idx  <- (seq_len(nrow(x)))[-train_idx]
+train_x <- as.matrix(x[train_idx, ])
+train_y <- y[train_idx]
+val_x <- as.matrix(x[val_idx, ])
+val_y <- y[val_idx]
+
+mnist_model <-
+  xgboost(
+    data = train_x,
+    label = train_y,
+    nrounds = 1000,
+    objective = "multi:softmax",
+    num_class = 10,
+    early_stopping_rounds = 5,
+    max_depth = 2,
+    eta = .8)
+y_hat <- predict(mnist_model, val_x)
+mean(val_y == y_hat)
 ```
 
-# Predict with xgboost
 ```{r}
+train_data <- read.csv("./mnist/train.csv")
+test_data <- read.csv("./mnist/test.csv")
 ## load lower dimension representation
-mnist_autoencoder <- read.csv("./output/mnist_autoencoder.csv")
-train_x <- as.matrix(mnist_autoencoder)
+train_x_low_data <- read.csv("./output/mnist_autoencoder.csv")
+test_x_low_data <- read.csv("")
+train_x <- as.matrix(train_x_low_data)
 train_y <- train_data$label
+test_x <- as.matrix(test_x_low_data)
 
-k <- 5
-n <- nrow(train_x)
-cv_accuracy <- c()
-folds <- sample(rep(1:k, length = n))
-for (i in 1:k) {
-  mnist_model <-
-    xgboost(
-      data = train_x[folds != i, ],
-      label = train_y[folds != i],
-      nrounds = 1000,
-      objective = "multi:softmax",
-      num_class = 10,
-      early_stopping_rounds = 5,
-      max_depth = 2,
-      eta = .8)
-  y_hat <- predict(mnist_model, train_x[folds == i, ])
-  cv_accuracy[i] <- mean(train_y[folds == i] == y_hat)
-  cat(i, "\r")
-}
-cv_accuracy_mean <- mean(cv_accuracy)
+mnist_model <-
+  xgboost(
+    data = train_x,
+    label = train_y,
+    nrounds = 10,
+    objective = "multi:softmax",
+    num_class = 10,
+    early_stopping_rounds = 5,
+    max_depth = 2,
+    eta = .8)
+y_hat <- predict(mnist_model, test_x)
+submission <- data.frame(ImageId = seq_len(nrow(test_x)), Label = y_hat)
+write.csv(submission, "./submission.csv")
 ```
