@@ -1,15 +1,13 @@
-# install.packages("dimRed", dependencies = TRUE)
-
 library(readr)
 library(mice);library(tidyverse);library(caret);library(glmnet);library(gbm)
 library(xgboost);library(Metrics);library(pls)
-
+library(dimRed)
 
 train <- read.csv('c:/Project 2 8330/train.csv', header = TRUE)
 test <- read.csv('c:/Project 2 8330/test.csv', header = TRUE)
-train <- as.matrix(train)
+#train <- as.matrix(train)
 # define x 
-X_train <- as.matrix(train[,-1])
+X_train <- as.matrix(rbind(train[,-1], test))
 X_test <- test
 y_train <- train$label
 
@@ -18,9 +16,8 @@ X <- X_train
 image(matrix(X[15,], nrow = sqrt(ncol(X))))
 
 set.seed(1)
-subsamp <- X[c(sample(1:14000, 700),
-               sample(14001: 28000, 700),
-               sample(28001: 42000, 700)), ]
+subsamp <- X[c(sample(1:35000, 700),
+               sample(35001: 70000, 700)), ]
 
 Xcentered <- scale(subsamp, center = T, scale = F)
 svd <- svd(Xcentered)
@@ -42,12 +39,13 @@ points(log(scrambleD[1:100]))
 
 # Do the pca
 pcomp <- prcomp(Xcentered)
-comps <- pcomp$rotation[,1:38]
+saveRDS(pcomp, './pcomp.rds')
+comps <- pcomp$rotation[,1:37]
 dim(X)
 dim(comps)
 dim(compx <- X%*%comps)
 compx
-
+saveRDS(compx, './PCA_comps.rds')
 set.seed(4)
 # Using lasso regression to fit the data
 
@@ -91,21 +89,17 @@ for (i in 1:k) {
   cv_accuracy[i] <- mean(train_y[folds == i] == y_hat)
   cat(i, "\r")
 }
+
 cv_accuracy_mean <- mean(cv_accuracy)
 cv_accuracy_mean
-
 
 start_time <- Sys.time()
 embeding_le <- dimRed::embed(X, 'LaplacianEigenmaps')
 end_time <- Sys.time()
 
-saveRDS(embeding_le, './embeding_le.eds')
+saveRDS(embeding_le, './embeding_le.rds')
 time_diff_embed <- end_time - start_time
 write.csv(time_diff_embed, './embeding_time.csv')
-
-plot(embeding@data@data, col = y_train)
-plot(X %*% comps[,1:2], col = y_train)
-
 
 plot(embeding@data@data, col = y_train)
 plot(X %*% comps[,1:2], col = y_train)
