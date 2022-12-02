@@ -1,3 +1,5 @@
+# install.packages("dimRed", dependencies = TRUE)
+
 library(readr)
 library(mice);library(tidyverse);library(caret);library(glmnet);library(gbm)
 library(xgboost);library(Metrics);library(pls)
@@ -93,8 +95,16 @@ cv_accuracy_mean <- mean(cv_accuracy)
 cv_accuracy_mean
 
 
-embeding <- embed(X, dimension = 2)
-llebed <- lle(X, 2)
+start_time <- Sys.time()
+embeding_le <- dimRed::embed(X, 'LaplacianEigenmaps')
+end_time <- Sys.time()
+
+saveRDS(embeding_le, './embeding_le.eds')
+time_diff_embed <- end_time - start_time
+write.csv(time_diff_embed, './embeding_time.csv')
+
+plot(embeding@data@data, col = y_train)
+plot(X %*% comps[,1:2], col = y_train)
 
 
 plot(embeding@data@data, col = y_train)
