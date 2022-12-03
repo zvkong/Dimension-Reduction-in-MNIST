@@ -43,7 +43,7 @@ decoder = tf.keras.Model(encoded, decoded)
 encoded_imgs = encoder.predict(X_img)
 decoded_imgs = decoder.predict(encoded_imgs)
 
-# plot decoded
+# plot original digits decoded digits
 idxs = np.random.randint(0, X_img.shape[0], 5)
 i = 0
 plt.figure(figsize=[12, 4])
