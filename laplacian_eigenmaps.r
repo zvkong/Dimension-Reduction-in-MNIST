@@ -14,7 +14,6 @@ start = Sys.time()
 embedding_le <- dimRed::embed(X, "LaplacianEigenmaps")
 end = Sys.time()
 time_diff = end - start
-write.csv(time_diff, "le_time.csv")
 saveRDS(embedding_le, "embedding_le.rds")
 
 # plot low-dim train data with labels
