@@ -11,7 +11,7 @@ x <- rbind(x_train, x_test)
 
 ## fit Laplacian Eigenmaps
 start = Sys.time()
-embedding_le <- dimRed::embed(X, "LaplacianEigenmaps")
+embedding_le <- dimRed::embed(x, ndim = 2, "LaplacianEigenmaps")
 end = Sys.time()
 time_diff = end - start
 saveRDS(embedding_le, "embedding_le.rds")
@@ -19,6 +19,6 @@ saveRDS(embedding_le, "embedding_le.rds")
 # plot low-dim train data with labels
 ## embedding_le <- readRDS("./embedding_le.rds")
 embedding_le_train <- embedding_le@data@data[1:42000, ]
-png(filename="./img/laplacian_eigenmaps.png")
+png(filename = "./img/laplacian_eigenmaps.png")
 plot(embedding_le_train, col = y_train)
 dev.off()

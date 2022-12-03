@@ -13,6 +13,7 @@ for i in range(4):
     idx = np.random.randint(0, 4137)
     plt.subplot(1, 4, i+1)
     plt.imshow(X_train_digit[idx])
+    plt.xlabel("Sample {}".format(i))
     i += 1
     pass
 plt.tight_layout()
