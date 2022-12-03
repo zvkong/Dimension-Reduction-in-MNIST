@@ -1,2 +1,5 @@
 mnist/
 output/
+embedding_le.rds
+submission.csv
+le_time.csv
