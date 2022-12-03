@@ -9,6 +9,7 @@ test_data = pd.read_csv("./mnist/test.csv")
 X_train = train_data.iloc[:, 1:].values.astype('float32') / 255.
 X_test = test_data.values.astype('float32') / 255.
 
+# combine features
 X_train_img = X_train.reshape(-1, 28, 28)
 X_test_img = X_test.reshape(-1, 28, 28)
 X_img = np.concatenate((X_train_img, X_test_img), axis=0)
