@@ -8,7 +8,7 @@ library(xgboost)
 train_data <- read.csv("./mnist/train.csv")
 
 ## load lower dimension representations
-## embedding_le <- readRDS("./embedding_le.rds")
+## train_x <- as.matrix(train_data[, -1])
 embedding_autoencoder <- read.csv("./output/mnist_autoencoder.csv")
 
 ## resplit train/test
